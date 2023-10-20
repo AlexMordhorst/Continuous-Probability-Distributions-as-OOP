@@ -32,14 +32,14 @@ class ContinuousDistribution(UnivPD):
         for k, v in parameters.items():
             setattr(self, k , v)
 
-    def densityFunction(self, k): #warum x als parameter und nicht k?
+    def pdf(self, k): #warum x als parameter und nicht k?
         if k >= self.theta1 and k <= self.theta2:
             return 1/(self.theta1-self.theta2)
         else:
             return 0
 
     def vectorizedDensity(self):
-        return np.vectorize(self.densityFunction) #vectorize function on what?
+        return np.vectorize(self.pdf) #vectorize function on what?
 
     def integrate(self, f, a, b, steps = 50, plot = False):
         step_size = (b-a)/steps
@@ -57,7 +57,7 @@ class ContinuousDistribution(UnivPD):
         plt.ylim([0, max(y)+1])#warum ylim nicht 1? bzw da auc von density immer 1, macht >1 hier wenig sinn
         plt.show()
 
-    def probability(self, a, b):
+    def cdf(self, a, b):
         probability = self.integrate(self.vectorizedDensity(), a, b)
         return probability
 
@@ -75,13 +75,13 @@ class UniformDistribution(ContinuousDistribution):
         self.theta1 = theta1
         self.theta2 = theta2
 
-    def densityFunction(self, k): #hier nunr k als parameter
+    def pdf(self, k): #hier nunr k als parameter
         if k >= self.theta1 and k <= self.theta2:
             return 1/(self.theta2-self.theta1)
         else:
             return 0
 
-    def probability(self, a, b):
+    def cdf(self, a, b):
         probability = self.integrate(self.vectorizedDensity(), a, b, steps = 50, plot= True)
         return probability
 
@@ -93,7 +93,7 @@ class UniformDistribution(ContinuousDistribution):
 
 #%%
 #a = UniformDistribution(theta1=0, theta2 = 30)
-#a.probability(25,30)
+#a.cdf(25,30)
 #a.expectedValue()
 #a.variance()
 
@@ -106,11 +106,11 @@ class NormalDistribution(ContinuousDistribution):
         self.mu = mu
         self.sigma = sigma
 
-    def densityFunction(self, k):
+    def pdf(self, k):
         exp = np.exp(-(((k - self.mu)**2)/(2*self.sigma**2)))
         return ((1/(self.sigma*np.sqrt(2*np.pi)))*exp)
 
-    def probability(self, a, b):
+    def cdf(self, a, b):
         if self.sigma > 0:
             probability = self.integrate(self.vectorizedDensity(), a, b, steps=100, plot = True)
             return probability
@@ -125,7 +125,7 @@ class NormalDistribution(ContinuousDistribution):
 
 #%%
 #dist = NormalDistribution(mu = 75, sigma = 10)
-#dist.probability(80,90)
+#dist.cdf(80,90)
 #dist.expectedValue()
 #dist.variance()
 
@@ -136,11 +136,11 @@ class TDistribution(ContinuousDistribution):
     """
     def __init__(self, df):
         self.df = df
-    def densityFunction(self, k):
+    def pdf(self, k):
         factor = np.math.gamma(self.df + 1 / 2)/np.sqrt(self.df * np.pi)*np.math.gamma(self.df/2)
         return factor * (1 + k**2/self.df)**-(self.df+1/2)
 
-    def probability(self, a, b):
+    def cdf(self, a, b):
         probability = self.integrate(self.vectorizedDensity(), a, b, steps=100, plot = True)
         return probability
 
@@ -156,5 +156,5 @@ class TDistribution(ContinuousDistribution):
             return ValueError
 
 #%%
-tdist = TDistribution(df= 30)
-tdist.probability(0.8,0.9)
+#tdist = TDistribution(df= 30)
+#tdist.cdf(0.8,0.9)
